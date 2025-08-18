@@ -24,8 +24,9 @@ namespace StarterAssets
         public float manaChange = 1;
         public GameObject fire;
         [Header("Player")]
-        [Tooltip("Move speed of the character in m/s")]
-        public float MoveSpeed = 2.0f;
+        //[Tooltip("Move speed of the character in m/s")]
+        //public float MoveSpeed = 2.0f;
+        //removed to fit the needs of the game
 
         [Tooltip("Sprint speed of the character in m/s")]
         public float SprintSpeed = 5.335f;
@@ -240,13 +241,12 @@ namespace StarterAssets
 
         private void Move()
         {
-            // set target speed based on move speed, sprint speed and if sprint is pressed
-            //float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+            
             float targetSpeed = SprintSpeed;
-            // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
+            // removed walking and kept at sprinting for the horror game feel
+            //I wanted the speed up to be attached to the mana system too
 
-            // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
-            // if there is no input, set the target speed to 0
+            
             if (_input.move == Vector2.zero) targetSpeed = 0.0f;
 
             // a reference to the players current horizontal velocity
@@ -442,18 +442,19 @@ namespace StarterAssets
             LightOff();
             SpeedOff();
         }
+        // manipulation of speed variable in spell as game mechanic
         private void OnSpeed()
         {
             isSpeed = !isSpeed;
             if (isSpeed)
             {
-                MoveSpeed *= 2;
+
                 SprintSpeed *= 2;
                 manaChange -= 3;
             }
             else
             {
-                MoveSpeed /= 2;
+
                 SprintSpeed /= 2;
                 manaChange += 3;
             }
@@ -463,11 +464,11 @@ namespace StarterAssets
             if (isSpeed)
             {
                 isSpeed = false;
-                MoveSpeed /= 2;
+                
                 SprintSpeed /= 2;
                 manaChange += 3;
             }
-            //probably should remove walking
+            
         }
 
 
