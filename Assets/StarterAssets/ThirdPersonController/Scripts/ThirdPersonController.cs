@@ -494,32 +494,36 @@ namespace StarterAssets
         }
         public void OnTeleport()
         {
-            RaycastHit hit;
-            //Physics.Raycast(Camera.main.transform.position, new Vector3(Camera.main.ScreenToWorldPoint(mouseLoc.ReadValue<Vector2>()).x, Camera.main.ScreenToWorldPoint(mouseLoc.ReadValue<Vector2>()).y, 100), out hit, 100);
-            //Physics.Raycast(Camera.main.transform.position, )
-            Ray r = Camera.main.ScreenPointToRay(new UnityEngine.Vector3(440, 217.5f, 0));
-            Physics.Raycast(r, out hit);
-            if (hit.collider != null)
+            if (mana > 40)
             {
-                _controller.enabled = false;
-                transform.position = hit.point;
+                RaycastHit hit;
+                //Physics.Raycast(Camera.main.transform.position, new Vector3(Camera.main.ScreenToWorldPoint(mouseLoc.ReadValue<Vector2>()).x, Camera.main.ScreenToWorldPoint(mouseLoc.ReadValue<Vector2>()).y, 100), out hit, 100);
+                //Physics.Raycast(Camera.main.transform.position, )
+                Ray r = Camera.main.ScreenPointToRay(new UnityEngine.Vector3(440, 217.5f, 0));
+                Physics.Raycast(r, out hit, 10);
+                if (hit.collider != null)
+                {
+                    _controller.enabled = false;
+                    transform.position = hit.point;
 
-                _controller.enabled = true;
+                    _controller.enabled = true;
 
-                //Debug.Log(transform.position);
-                //Debug.Log(hit.transform.position);
+                    //Debug.Log(transform.position);
+                    //Debug.Log(hit.transform.position);
 
+                }
+                else
+                {
+                    Debug.Log("yes");
+                    _controller.enabled = false;
+                    transform.position += (transform.position - aim.position).normalized * 5;
+
+
+                    _controller.enabled = true;
+                }
+                mana -= 40;
             }
-            else
-            {
-                transform.position = 
-            }
-            //Debug.Log(hit);
-
-
-
-            //Debug.Log(mouseLoc.ReadValue)
-            Debug.Log(transform.position);
+            
 
 
         }
