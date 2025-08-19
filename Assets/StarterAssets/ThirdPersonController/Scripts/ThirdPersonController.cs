@@ -1,5 +1,8 @@
+//using System.Numerics;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Unity.VisualStudio.Editor;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
@@ -16,12 +19,18 @@ namespace StarterAssets
 #endif
     public class ThirdPersonController : MonoBehaviour
     {
+        [SerializeField] Transform aim;
+        [SerializeField] LineRenderer lineRenderer;
+        //probably should add a teleport animation at some point
+        public InputAction tp;
         public InputAction ignite;
         public InputAction hasten;
+        public InputAction mouseLoc;
         public bool isSpeed = false;
         public UnityEngine.UI.Image bar;
         public float mana = 100;
         public float manaChange = 1;
+        public Camera cam;
         public GameObject fire;
         [Header("Player")]
         //[Tooltip("Move speed of the character in m/s")]
@@ -107,8 +116,9 @@ namespace StarterAssets
         private int _animIDJump;
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
+        public InputAction pos;
 
-#if ENABLE_INPUT_SYSTEM 
+#if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
 #endif
         private Animator _animator;
@@ -147,6 +157,9 @@ namespace StarterAssets
         {
             ignite = InputSystem.actions.FindAction("Light");
             hasten = InputSystem.actions.FindAction("Speed");
+            tp = InputSystem.actions.FindAction("Teleport");
+            pos = InputSystem.actions.FindAction("Position");
+            mouseLoc = InputSystem.actions.FindAction("Look");
             fire.SetActive(false);
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
@@ -170,7 +183,15 @@ namespace StarterAssets
         {
             _hasAnimator = TryGetComponent(out _animator);
             ManaUpdate();
-
+            //RaycastHit hit;
+            //Physics.Raycast(aim.position, cam.ScreenToWorldPoint(new UnityEngine.Vector3(mouseLoc.ReadValue<UnityEngine.Vector2>().x, mouseLoc.ReadValue<UnityEngine.Vector2>().y, 10)), out hit, 10);
+            //Debug.Log(Mouse.current.position);
+            //Ray r = cam.ScreenPointToRay(new UnityEngine.Vector3(440, 217.5f, 0));
+            
+            //Physics.Raycast(r, out hit);
+            //lineRenderer.enabled = true;
+            //lineRenderer.SetPosition(0, aim.position);
+            //lineRenderer.SetPosition(1, hit.point);
             JumpAndGravity();
             GroundedCheck();
             Move();
@@ -206,7 +227,7 @@ namespace StarterAssets
         private void GroundedCheck()
         {
             // set sphere position, with offset
-            Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset,
+            UnityEngine.Vector3 spherePosition = new UnityEngine.Vector3(transform.position.x, transform.position.y - GroundedOffset,
                 transform.position.z);
             Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers,
                 QueryTriggerInteraction.Ignore);
@@ -235,22 +256,22 @@ namespace StarterAssets
             _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
 
             // Cinemachine will follow this target
-            CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,
+            CinemachineCameraTarget.transform.rotation = UnityEngine.Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,
                 _cinemachineTargetYaw, 0.0f);
         }
 
         private void Move()
         {
-            
+
             float targetSpeed = SprintSpeed;
             // removed walking and kept at sprinting for the horror game feel
             //I wanted the speed up to be attached to the mana system too
 
-            
-            if (_input.move == Vector2.zero) targetSpeed = 0.0f;
+
+            if (_input.move == UnityEngine.Vector2.zero) targetSpeed = 0.0f;
 
             // a reference to the players current horizontal velocity
-            float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
+            float currentHorizontalSpeed = new UnityEngine.Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
 
             float speedOffset = 0.1f;
             float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
@@ -276,11 +297,11 @@ namespace StarterAssets
             if (_animationBlend < 0.01f) _animationBlend = 0f;
 
             // normalise input direction
-            Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
+            UnityEngine.Vector3 inputDirection = new UnityEngine.Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
 
             // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is a move input rotate player when the player is moving
-            if (_input.move != Vector2.zero)
+            if (_input.move != UnityEngine.Vector2.zero)
             {
                 _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
                                   _mainCamera.transform.eulerAngles.y;
@@ -288,15 +309,15 @@ namespace StarterAssets
                     RotationSmoothTime);
 
                 // rotate to face input direction relative to camera position
-                transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+                transform.rotation = UnityEngine.Quaternion.Euler(0.0f, rotation, 0.0f);
             }
 
 
-            Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+            UnityEngine.Vector3 targetDirection = UnityEngine.Quaternion.Euler(0.0f, _targetRotation, 0.0f) * UnityEngine.Vector3.forward;
 
             // move the player
             _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
-                             new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+                             new UnityEngine.Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 
             // update animator if using character
             if (_hasAnimator)
@@ -392,7 +413,7 @@ namespace StarterAssets
 
             // when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
             Gizmos.DrawSphere(
-                new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z),
+                new UnityEngine.Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z),
                 GroundedRadius);
         }
 
@@ -402,7 +423,7 @@ namespace StarterAssets
             {
                 if (FootstepAudioClips.Length > 0)
                 {
-                    var index = Random.Range(0, FootstepAudioClips.Length);
+                    var index = UnityEngine.Random.Range(0, FootstepAudioClips.Length);
                     AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
                 }
             }
@@ -435,7 +456,7 @@ namespace StarterAssets
                 fire.SetActive(false);
                 manaChange += 2f;
             }
-            
+
         }
         public void DeactivateAll()
         {
@@ -464,11 +485,43 @@ namespace StarterAssets
             if (isSpeed)
             {
                 isSpeed = false;
-                
+
                 SprintSpeed /= 2;
                 manaChange += 3;
             }
-            
+
+
+        }
+        public void OnTeleport()
+        {
+            RaycastHit hit;
+            //Physics.Raycast(Camera.main.transform.position, new Vector3(Camera.main.ScreenToWorldPoint(mouseLoc.ReadValue<Vector2>()).x, Camera.main.ScreenToWorldPoint(mouseLoc.ReadValue<Vector2>()).y, 100), out hit, 100);
+            //Physics.Raycast(Camera.main.transform.position, )
+            Ray r = Camera.main.ScreenPointToRay(new UnityEngine.Vector3(440, 217.5f, 0));
+            Physics.Raycast(r, out hit);
+            if (hit.collider != null)
+            {
+                _controller.enabled = false;
+                transform.position = hit.point;
+
+                _controller.enabled = true;
+
+                //Debug.Log(transform.position);
+                //Debug.Log(hit.transform.position);
+
+            }
+            else
+            {
+                transform.position = 
+            }
+            //Debug.Log(hit);
+
+
+
+            //Debug.Log(mouseLoc.ReadValue)
+            Debug.Log(transform.position);
+
+
         }
 
 
