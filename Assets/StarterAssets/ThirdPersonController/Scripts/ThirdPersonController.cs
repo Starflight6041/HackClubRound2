@@ -209,6 +209,10 @@ namespace StarterAssets
             }
             bar.fillAmount = mana / 100;
         }
+        public void ChangeMana(float m)
+        {
+            mana += m;
+        }
 
         private void LateUpdate()
         {
