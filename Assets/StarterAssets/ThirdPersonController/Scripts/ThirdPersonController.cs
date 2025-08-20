@@ -160,6 +160,15 @@ namespace StarterAssets
 
         private void Start()
         {
+            Debug.Log("test");
+            Debug.Log("test");
+            Debug.Log("test");
+            Debug.Log("test");
+            Debug.Log("test");
+            Debug.Log("test");
+            Debug.Log("test");
+            Debug.Log("track my time please hackatime");
+            Debug.Log("test");
             ignite = InputSystem.actions.FindAction("Light");
             hasten = InputSystem.actions.FindAction("Speed");
             tp = InputSystem.actions.FindAction("Teleport");

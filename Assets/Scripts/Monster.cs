@@ -19,6 +19,26 @@ public class Monster : MonoBehaviour
         Debug.Log("test");
         Debug.Log("test");
         Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("a");
+        Debug.Log("b");
+        Debug.Log("Hackatime why are you breaking, please just track my time like a good piece of software");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        Debug.Log("test");
+        
     }
 
     // Update is called once per frame
