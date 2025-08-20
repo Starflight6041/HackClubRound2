@@ -1,4 +1,5 @@
 //using System.Numerics;
+using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Unity.VisualStudio.Editor;
 using Unity.Collections;
@@ -17,7 +18,7 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
-// add hunger system eventually
+    // add hunger system eventually
     public class ThirdPersonController : MonoBehaviour
     {
         [SerializeField] Transform aim;
@@ -29,7 +30,7 @@ namespace StarterAssets
         public InputAction mouseLoc;
         public bool isSpeed = false;
         public UnityEngine.UI.Image bar;
-        
+
         public float mana = 100;
         public float saturation = 100;
         public float saturationChange;
@@ -201,7 +202,7 @@ namespace StarterAssets
             //Physics.Raycast(aim.position, cam.ScreenToWorldPoint(new UnityEngine.Vector3(mouseLoc.ReadValue<UnityEngine.Vector2>().x, mouseLoc.ReadValue<UnityEngine.Vector2>().y, 10)), out hit, 10);
             //Debug.Log(Mouse.current.position);
             //Ray r = cam.ScreenPointToRay(new UnityEngine.Vector3(440, 217.5f, 0));
-            
+
             //Physics.Raycast(r, out hit);
             //lineRenderer.enabled = true;
             //lineRenderer.SetPosition(0, aim.position);
@@ -230,7 +231,7 @@ namespace StarterAssets
             {
                 // call death function
             }
-            
+
             bar.fillAmount = mana / 100;
         }
         public void ChangeMana(float m)
@@ -551,10 +552,11 @@ namespace StarterAssets
                 }
                 mana -= 40;
             }
-            
+
 
 
         }
+        
 
 
 
