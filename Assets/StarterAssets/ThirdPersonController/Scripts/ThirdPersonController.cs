@@ -17,6 +17,7 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
+// add hunger system eventually
     public class ThirdPersonController : MonoBehaviour
     {
         [SerializeField] Transform aim;
@@ -28,7 +29,11 @@ namespace StarterAssets
         public InputAction mouseLoc;
         public bool isSpeed = false;
         public UnityEngine.UI.Image bar;
+        
         public float mana = 100;
+        public float saturation = 100;
+        public float saturationChange;
+
         public float manaChange = 1;
         public Camera cam;
         public GameObject fire;
@@ -199,6 +204,7 @@ namespace StarterAssets
         public void ManaUpdate()
         {
             mana += manaChange / 100;
+            saturation += saturationChange / 100;
             if (mana > 100)
             {
                 mana = 100;
@@ -207,6 +213,15 @@ namespace StarterAssets
             {
                 DeactivateAll();
             }
+            if (saturation > 100)
+            {
+                saturation = 100;
+            }
+            if (saturation < 0)
+            {
+                // call death function
+            }
+            
             bar.fillAmount = mana / 100;
         }
         public void ChangeMana(float m)
