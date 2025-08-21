@@ -10,7 +10,9 @@ public class Monster : MonoBehaviour
 {
     public GameObject player;
     private float targetRotation;
-    public float timeSinceChasingPlayer;
+    private float timeChasing;
+    private float timeInRange = 0;
+    public Light jumpscareLight;
 
     public CinemachineBrain brain;
     private Vector3 targetPosition;
@@ -22,22 +24,58 @@ public class Monster : MonoBehaviour
     void Start()
     {
         //rigid.isKinematic = true;
-        Jumpscare();
+        //Jumpscare();
 
     }
 
     // Update is called once per frame
     void Update()
     {
+        /*
         RaycastHit hit1;
         RaycastHit hit2;
         RaycastHit hit3;
         RaycastHit hit4;
         Physics.Raycast(transform.position, Vector3.forward, out hit1, 1);
-        Physics.Raycast(transform.position, Vector3.back, out hit2, 1);
-        Physics.Raycast(transform.position, Vector3.left, out hit3, 1);
-        Physics.Raycast(transform.position, Vector3.right, out hit4, 1);
-        
+        Physics.Raycast(transform.position + Vector3.up, Vector3.back, out hit2, 1);
+        Physics.Raycast(transform.position + Vector3.up, Vector3.left, out hit3, 1);
+        Physics.Raycast(transform.position + Vector3.up, Vector3.right, out hit4, 1);
+        Debug.DrawRay(transform.position + Vector3.up, Vector3.forward, Color.red, 100);
+        //Debug.Log(hit1.collider);
+        if (hit1.collider != null)
+        {
+            //Debug.Log("yes");
+            if (hit1.collider.gameObject.GetComponent<ThirdPersonController>())
+            {
+                Jumpscare();
+            }
+
+        }
+        if (hit2.collider != null)
+        {
+            if (hit2.collider.gameObject.GetComponent<ThirdPersonController>())
+            {
+                Jumpscare();
+            }
+            
+        }
+        if (hit3.collider != null)
+        {
+            if (hit3.collider.gameObject.GetComponent<ThirdPersonController>())
+            {
+                Jumpscare();
+            }
+            
+        }
+        if (hit4.collider != null)
+        {
+            if (hit4.collider.gameObject.GetComponent<ThirdPersonController>())
+            {
+                Jumpscare();
+            }
+            
+        }
+        */
         if (state == 0)
         {
 
@@ -50,6 +88,7 @@ public class Monster : MonoBehaviour
 
             //Debug.Log("test");
             Chase();
+        
         }
         else
         {
@@ -70,7 +109,10 @@ public class Monster : MonoBehaviour
     public void Chase()
     {
         targetPosition = player.transform.position;
-        Debug.Log("yes");
+        timeChasing += Time.deltaTime;
+        
+        
+        //Debug.Log("yes");
     }
     public void Idle()
     {
@@ -80,15 +122,17 @@ public class Monster : MonoBehaviour
     {
         //agent.enabled = false;
         brain.enabled = false;
-
+        agent.enabled = false;
         //Destroy(rigid);
         //player.transform.LookAt(gameObject.transform);
-        Camera.main.transform.position = gameObject.transform.position + new Vector3(.5f, 3f, -3);
+        Destroy(player);
+        Camera.main.transform.position = gameObject.transform.position + new Vector3(0, 1f, -3.5f);
         Camera.main.transform.LookAt(gameObject.transform.position + Vector3.up * 2);
 
-        gameObject.transform.LookAt(player.transform.position);
+        gameObject.transform.LookAt(Camera.main.transform.position + Vector3.down * 3);
         //Destroy(player);
         state = 0;
+        jumpscareLight.gameObject.SetActive(true);
         gameObject.GetComponent<Animator>().Play("bite");
 
     }

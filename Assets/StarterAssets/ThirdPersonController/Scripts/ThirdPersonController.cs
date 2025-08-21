@@ -30,7 +30,7 @@ namespace StarterAssets
         public InputAction mouseLoc;
         public bool isSpeed = false;
         public UnityEngine.UI.Image bar;
-
+        private bool isStealth = false;
         public float mana = 100;
         public float saturation = 100;
         public float saturationChange;
@@ -128,6 +128,7 @@ namespace StarterAssets
         private PlayerInput _playerInput;
 #endif
         private Animator _animator;
+        public Monster monster;
         private CharacterController _controller;
         private StarterAssetsInputs _input;
         private GameObject _mainCamera;
@@ -196,6 +197,49 @@ namespace StarterAssets
 
         private void Update()
         {
+            RaycastHit hit1;
+        RaycastHit hit2;
+        RaycastHit hit3;
+        RaycastHit hit4;
+        Physics.Raycast(transform.position, Vector3.forward, out hit1, 1);
+        Physics.Raycast(transform.position + Vector3.up, Vector3.back, out hit2, 1);
+        Physics.Raycast(transform.position + Vector3.up, Vector3.left, out hit3, 1);
+        Physics.Raycast(transform.position + Vector3.up, Vector3.right, out hit4, 1);
+        Debug.DrawRay(transform.position + Vector3.up, Vector3.forward, Color.red, 100);
+        //Debug.Log(hit1.collider);
+        if (hit1.collider != null)
+        {
+            //Debug.Log("yes");
+            if (hit1.collider.gameObject.GetComponent<Monster>())
+            {
+                monster.GetComponent<Monster>().Jumpscare();
+            }
+
+        }
+        if (hit2.collider != null)
+        {
+            if (hit2.collider.gameObject.GetComponent<Monster>())
+            {
+                monster.GetComponent<Monster>().Jumpscare();
+            }
+            
+        }
+        if (hit3.collider != null)
+        {
+            if (hit3.collider.gameObject.GetComponent<Monster>())
+            {
+                monster.GetComponent<Monster>().Jumpscare();
+            }
+            
+        }
+        if (hit4.collider != null)
+        {
+            if (hit4.collider.gameObject.GetComponent<Monster>())
+            {
+                monster.GetComponent<Monster>().Jumpscare();
+            }
+            
+        }
             _hasAnimator = TryGetComponent(out _animator);
             ManaUpdate();
             //RaycastHit hit;
@@ -464,6 +508,11 @@ namespace StarterAssets
             {
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
             }
+        }
+        private void OnStealth()
+        {
+            isStealth = true;
+            
         }
         private void OnLight()
         {
