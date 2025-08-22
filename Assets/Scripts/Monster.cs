@@ -12,6 +12,7 @@ using UnityEngine.Rendering;
 
 public class Monster : MonoBehaviour
 {
+    public AudioSource audioSource;
     public GameObject player;
     
     private float targetRotation;
@@ -308,6 +309,7 @@ public class Monster : MonoBehaviour
         gameObject.transform.LookAt(Camera.main.transform.position + Vector3.down * 3);
         //Destroy(player);
         state = 0;
+        audioSource.Play();
         jumpscareLight.gameObject.SetActive(true);
         gameObject.GetComponent<Animator>().Play("bite");
 

@@ -614,7 +614,7 @@ namespace StarterAssets
                 {
                     Debug.Log("yes");
                     _controller.enabled = false;
-                    transform.position += (transform.position - aim.position).normalized * 5;
+                    transform.position += (transform.position - aim.position).normalized * 10;
 
 
                     _controller.enabled = true;
