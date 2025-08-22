@@ -4,17 +4,19 @@ using StarterAssets;
 using Unity.Burst.Intrinsics;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
-using UnityEditor.Animations;
-using UnityEditor.Experimental.GraphView;
+//using UnityEditor.Animations;
+//using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 public class Monster : MonoBehaviour
 {
     public AudioSource audioSource;
     public GameObject player;
-    
+
     private float targetRotation;
     private float timeChasing;
     private float timeInRange;
@@ -30,7 +32,8 @@ public class Monster : MonoBehaviour
     public GameObject target2;
     public GameObject target3;
     public GameObject target4;
-    public ArrayList a = new ArrayList(); 
+    //public Canvas gameOverCanvas;
+    public ArrayList a = new ArrayList();
     //public CharacterController controller;
     public int state = 1;
     public NavMeshAgent agent;
@@ -38,6 +41,7 @@ public class Monster : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //gameOverCanvas.gameObject.SetActive(false);
         //rigid.isKinematic = true;
         //Jumpscare();
         a.Add(target1);
@@ -55,14 +59,14 @@ public class Monster : MonoBehaviour
         RaycastHit hit1;
         RaycastHit hit2;
         RaycastHit hit3;
-        
-        Physics.Raycast(transform.position,  Vector3.RotateTowards(Vector3.back, transform.forward, 6, 6), out hit1, 20);
-        Physics.Raycast(transform.position,  Vector3.RotateTowards(new Vector3(0.25f, 0 , -0.5f).normalized, transform.forward, 6, 6), out hit2, 20);
+
+        Physics.Raycast(transform.position, Vector3.RotateTowards(Vector3.back, transform.forward, 6, 6), out hit1, 20);
+        Physics.Raycast(transform.position, Vector3.RotateTowards(new Vector3(0.25f, 0, -0.5f).normalized, transform.forward, 6, 6), out hit2, 20);
         Physics.Raycast(transform.position, Vector3.RotateTowards(new Vector3(-0.25f, 0, 0.5f).normalized, transform.forward, 6, 6), out hit3, 20);
         //Debug.DrawRay(transform.position, Vector3.RotateTowards(Vector3.back * 20, transform.forward, 6, 6), Color.red, 1);
         //Debug.Log(gameObject.transform.eulerAngles.y);
         timeSinceLosingVision += Time.deltaTime;
-        
+
         if (hit1.collider != null)
         {
             //Debug.Log("yes");
@@ -71,7 +75,7 @@ public class Monster : MonoBehaviour
                 Debug.Log("waheee");
                 canSee = true;
                 timeSinceLosingVision = 0;
-                
+
             }
 
         }
@@ -95,7 +99,7 @@ public class Monster : MonoBehaviour
             }
 
         }
-            
+
         timeSinceChase += Time.deltaTime;
         /*
         RaycastHit hit1;
@@ -189,12 +193,12 @@ public class Monster : MonoBehaviour
             {
                 timeInRange += Time.deltaTime;
             }
-        //if (timeInRange > 7 && player.GetComponent<ThirdPersonController>().InStealth())
-        //{
-        //    state = 0;
-        //    timeInRange = 0;
-        //}
-        //Debug.Log("chasing");
+            //if (timeInRange > 7 && player.GetComponent<ThirdPersonController>().InStealth())
+            //{
+            //    state = 0;
+            //    timeInRange = 0;
+            //}
+            //Debug.Log("chasing");
             if (timeChasing > 9 && timeSinceLosingVision > 2 && !canSee)
             {
                 state = 0;
@@ -202,15 +206,19 @@ public class Monster : MonoBehaviour
                 timeInRange = 0;
             } //maybe change time to be greater later
         }
-        
 
-        
-        
+
+
+
         //Debug.Log("yes");
     }
     public void ChangeState(int i)
     {
         state = i;
+        isAtPatrolPoint = true;
+        timeInRange = 0;
+        timeSinceChase = 0;
+        timeChasing = 0;
     }
     public void ChangePatrolPointStatus(bool a)
     {
@@ -222,9 +230,10 @@ public class Monster : MonoBehaviour
     }
     public void Patrol()
     {
-        
-        
-        
+        Debug.Log("patrolling");
+
+
+
         if (isAtPatrolPoint)
         {
             randPos = (GameObject)a[UnityEngine.Random.Range(0, a.Count - 1)];
@@ -237,7 +246,7 @@ public class Monster : MonoBehaviour
         {
             state = 2;
             timeInRange = 0;
-            
+
             isAtPatrolPoint = true;
             //now implement time since losing vision system
 
@@ -249,7 +258,7 @@ public class Monster : MonoBehaviour
                 timeInRange += Time.deltaTime;
             }
         }
-        
+
         if (canSee && timeSinceChase > 1)
         {
             state = 1;
@@ -269,13 +278,14 @@ public class Monster : MonoBehaviour
     }
     public void RunUntilSee()
     {
+        Debug.Log("running");
         timeSinceChase = 0;
         //Debug.Log("running");
         targetPosition = player.transform.position;
         if (canSee)
         {
             state = 1;
-            
+
             timeInRange = 0;
         }
         if (Math.Abs(player.transform.position.x - gameObject.transform.position.x) + Math.Abs(player.transform.position.y - gameObject.transform.position.y) + Math.Abs(player.transform.position.z - gameObject.transform.position.z) < 10)
@@ -287,7 +297,7 @@ public class Monster : MonoBehaviour
             state = 0;
             timeInRange = 0;
         }
-        
+
     }
 
 
@@ -312,6 +322,14 @@ public class Monster : MonoBehaviour
         audioSource.Play();
         jumpscareLight.gameObject.SetActive(true);
         gameObject.GetComponent<Animator>().Play("bite");
+        StartCoroutine(Enumerator());
+
+
+    }
+    IEnumerator Enumerator()
+    {
+        yield return new WaitForSeconds(3);
+        SceneManager.LoadScene("TitleScreen");
 
     }
     
