@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using StarterAssets;
 using Unity.Burst.Intrinsics;
 using Unity.Cinemachine;
@@ -7,21 +8,28 @@ using UnityEditor.Animations;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Rendering;
 
 public class Monster : MonoBehaviour
 {
     public GameObject player;
+    
     private float targetRotation;
     private float timeChasing;
     private float timeInRange;
+    private bool isAtPatrolPoint = false;
     private float timeSinceChase = 0;
     private float timeSinceLosingVision = 0;
     public bool canSee = false;
     public Light jumpscareLight;
     public GameObject target1;
-
+    public GameObject randPos;
     public CinemachineBrain brain;
     private Vector3 targetPosition;
+    public GameObject target2;
+    public GameObject target3;
+    public GameObject target4;
+    public ArrayList a = new ArrayList(); 
     //public CharacterController controller;
     public int state = 1;
     public NavMeshAgent agent;
@@ -31,6 +39,11 @@ public class Monster : MonoBehaviour
     {
         //rigid.isKinematic = true;
         //Jumpscare();
+        a.Add(target1);
+        a.Add(target2);
+        a.Add(target3);
+        a.Add(target4);
+        randPos = target1;
 
     }
 
@@ -41,10 +54,12 @@ public class Monster : MonoBehaviour
         RaycastHit hit1;
         RaycastHit hit2;
         RaycastHit hit3;
-        RaycastHit hit4;
-        Physics.Raycast(transform.position, Vector3.back, out hit1, 20);
-        Physics.Raycast(transform.position, new Vector3(0.25f, 0 , -0.5f).normalized, out hit2, 20);
-        Physics.Raycast(transform.position, new Vector3(-0.25f, 0, 0.5f).normalized, out hit3, 20);
+        
+        Physics.Raycast(transform.position,  Vector3.RotateTowards(Vector3.back, transform.forward, 6, 6), out hit1, 20);
+        Physics.Raycast(transform.position,  Vector3.RotateTowards(new Vector3(0.25f, 0 , -0.5f).normalized, transform.forward, 6, 6), out hit2, 20);
+        Physics.Raycast(transform.position, Vector3.RotateTowards(new Vector3(-0.25f, 0, 0.5f).normalized, transform.forward, 6, 6), out hit3, 20);
+        //Debug.DrawRay(transform.position, Vector3.RotateTowards(Vector3.back * 20, transform.forward, 6, 6), Color.red, 1);
+        //Debug.Log(gameObject.transform.eulerAngles.y);
         timeSinceLosingVision += Time.deltaTime;
         
         if (hit1.collider != null)
@@ -140,6 +155,10 @@ public class Monster : MonoBehaviour
             Chase();
 
         }
+        else if (state == 2)
+        {
+            RunUntilSee();
+        }
         else
         {
             targetPosition = new Vector3(0, 0, 0);
@@ -158,24 +177,31 @@ public class Monster : MonoBehaviour
     }
     public void Chase()
     {
-        timeSinceChase = 0;
-        targetPosition = player.transform.position;
-        timeChasing += Time.deltaTime;
-        Debug.Log(timeInRange);
-        if (Math.Abs(player.transform.position.x - gameObject.transform.position.x) + Math.Abs(player.transform.position.y - gameObject.transform.position.y) + Math.Abs(player.transform.position.z - gameObject.transform.position.z) < 10)
+        if (player)
         {
-            timeInRange += Time.deltaTime;
-        }
+            //Debug.Log("chasing");
+            timeSinceChase = 0;
+            targetPosition = player.transform.position;
+            timeChasing += Time.deltaTime;
+            //Debug.Log(timeInRange);
+            if (Math.Abs(player.transform.position.x - gameObject.transform.position.x) + Math.Abs(player.transform.position.y - gameObject.transform.position.y) + Math.Abs(player.transform.position.z - gameObject.transform.position.z) < 10)
+            {
+                timeInRange += Time.deltaTime;
+            }
         //if (timeInRange > 7 && player.GetComponent<ThirdPersonController>().InStealth())
         //{
         //    state = 0;
         //    timeInRange = 0;
         //}
-        if (timeChasing > 12 && timeSinceLosingVision > 5 && !canSee)
-        {
-            state = 0;
-            timeChasing = 0;
-        } //maybe change time to be greater later
+        //Debug.Log("chasing");
+            if (timeChasing > 9 && timeSinceLosingVision > 2 && !canSee)
+            {
+                state = 0;
+                timeChasing = 0;
+                timeInRange = 0;
+            } //maybe change time to be greater later
+        }
+        
 
         
         
@@ -185,20 +211,84 @@ public class Monster : MonoBehaviour
     {
         state = i;
     }
+    public void ChangePatrolPointStatus(bool a)
+    {
+        isAtPatrolPoint = a;
+    }
+    public GameObject GetPos()
+    {
+        return randPos;
+    }
     public void Patrol()
     {
-        targetPosition = target1.transform.position;
+        
+        
+        
+        if (isAtPatrolPoint)
+        {
+            randPos = (GameObject)a[UnityEngine.Random.Range(0, a.Count - 1)];
+
+            isAtPatrolPoint = false;
+        }
+        targetPosition = randPos.transform.position;
+        //Debug.Log("patrolling");
         if (timeSinceChase > 40)
         {
-            Chase();
+            state = 2;
+            timeInRange = 0;
+            
+            isAtPatrolPoint = true;
             //now implement time since losing vision system
 
+        }
+        if (player)
+        {
+            if (Math.Abs(player.transform.position.x - gameObject.transform.position.x) + Math.Abs(player.transform.position.y - gameObject.transform.position.y) + Math.Abs(player.transform.position.z - gameObject.transform.position.z) < 5)
+            {
+                timeInRange += Time.deltaTime;
+            }
+        }
+        
+        if (canSee && timeSinceChase > 1)
+        {
+            state = 1;
+            timeInRange = 0;
+            isAtPatrolPoint = true;
+        }
+        if (timeInRange > 5)
+        {
+            state = 1;
+            timeInRange = 0;
+            isAtPatrolPoint = true;
         }
         //if (canSee)
         //{
         //    state = 1;
         // }
     }
+    public void RunUntilSee()
+    {
+        timeSinceChase = 0;
+        //Debug.Log("running");
+        targetPosition = player.transform.position;
+        if (canSee)
+        {
+            state = 1;
+            
+            timeInRange = 0;
+        }
+        if (Math.Abs(player.transform.position.x - gameObject.transform.position.x) + Math.Abs(player.transform.position.y - gameObject.transform.position.y) + Math.Abs(player.transform.position.z - gameObject.transform.position.z) < 10)
+        {
+            timeInRange += Time.deltaTime;
+        }
+        if (timeInRange > 2)
+        {
+            state = 0;
+            timeInRange = 0;
+        }
+        
+    }
+
 
     public void Idle()
     {
