@@ -1,4 +1,6 @@
+using System;
 using StarterAssets;
+using Unity.Burst.Intrinsics;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
 using UnityEditor.Animations;
@@ -11,8 +13,12 @@ public class Monster : MonoBehaviour
     public GameObject player;
     private float targetRotation;
     private float timeChasing;
-    private float timeInRange = 0;
+    private float timeInRange;
+    private float timeSinceChase = 0;
+    private float timeSinceLosingVision = 0;
+    public bool canSee = false;
     public Light jumpscareLight;
+    public GameObject target1;
 
     public CinemachineBrain brain;
     private Vector3 targetPosition;
@@ -31,6 +37,50 @@ public class Monster : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        canSee = false;
+        RaycastHit hit1;
+        RaycastHit hit2;
+        RaycastHit hit3;
+        RaycastHit hit4;
+        Physics.Raycast(transform.position, Vector3.back, out hit1, 20);
+        Physics.Raycast(transform.position, new Vector3(0.25f, 0 , -0.5f).normalized, out hit2, 20);
+        Physics.Raycast(transform.position, new Vector3(-0.25f, 0, 0.5f).normalized, out hit3, 20);
+        timeSinceLosingVision += Time.deltaTime;
+        
+        if (hit1.collider != null)
+        {
+            //Debug.Log("yes");
+            if (hit1.collider.gameObject.tag == "a")
+            {
+                Debug.Log("waheee");
+                canSee = true;
+                timeSinceLosingVision = 0;
+                
+            }
+
+        }
+        if (hit2.collider != null)
+        {
+            if (hit2.collider.gameObject.tag == "a")
+            {
+                Debug.Log("waheee");
+                canSee = true;
+                timeSinceLosingVision = 0;
+            }
+
+        }
+        if (hit3.collider != null)
+        {
+            if (hit3.collider.gameObject.tag == "a")
+            {
+                Debug.Log("waheee");
+                canSee = true;
+                timeSinceLosingVision = 0;
+            }
+
+        }
+            
+        timeSinceChase += Time.deltaTime;
         /*
         RaycastHit hit1;
         RaycastHit hit2;
@@ -78,7 +128,7 @@ public class Monster : MonoBehaviour
         */
         if (state == 0)
         {
-
+            Patrol();
         }
         else if (state == 1)
         {
@@ -88,7 +138,7 @@ public class Monster : MonoBehaviour
 
             //Debug.Log("test");
             Chase();
-        
+
         }
         else
         {
@@ -108,12 +158,48 @@ public class Monster : MonoBehaviour
     }
     public void Chase()
     {
+        timeSinceChase = 0;
         targetPosition = player.transform.position;
         timeChasing += Time.deltaTime;
+        Debug.Log(timeInRange);
+        if (Math.Abs(player.transform.position.x - gameObject.transform.position.x) + Math.Abs(player.transform.position.y - gameObject.transform.position.y) + Math.Abs(player.transform.position.z - gameObject.transform.position.z) < 10)
+        {
+            timeInRange += Time.deltaTime;
+        }
+        //if (timeInRange > 7 && player.GetComponent<ThirdPersonController>().InStealth())
+        //{
+        //    state = 0;
+        //    timeInRange = 0;
+        //}
+        if (timeChasing > 12 && timeSinceLosingVision > 5 && !canSee)
+        {
+            state = 0;
+            timeChasing = 0;
+        } //maybe change time to be greater later
+
         
         
         //Debug.Log("yes");
     }
+    public void ChangeState(int i)
+    {
+        state = i;
+    }
+    public void Patrol()
+    {
+        targetPosition = target1.transform.position;
+        if (timeSinceChase > 40)
+        {
+            Chase();
+            //now implement time since losing vision system
+
+        }
+        //if (canSee)
+        //{
+        //    state = 1;
+        // }
+    }
+
     public void Idle()
     {
 

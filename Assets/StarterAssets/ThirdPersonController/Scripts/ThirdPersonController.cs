@@ -8,6 +8,7 @@ using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using test;
 #endif
 
 
@@ -25,11 +26,14 @@ namespace StarterAssets
         [SerializeField] LineRenderer lineRenderer;
         //probably should add a teleport animation at some point
         public InputAction tp;
+        public Material playerMat;
         public InputAction ignite;
+        public GameObject stealthParticles;
         public InputAction hasten;
         public InputAction mouseLoc;
         public bool isSpeed = false;
         public UnityEngine.UI.Image bar;
+       
         private bool isStealth = false;
         public float mana = 100;
         public float saturation = 100;
@@ -162,15 +166,8 @@ namespace StarterAssets
 
         private void Start()
         {
-            Debug.Log("test");
-            Debug.Log("test");
-            Debug.Log("test");
-            Debug.Log("test");
-            Debug.Log("test");
-            Debug.Log("test");
-            Debug.Log("test");
-            Debug.Log("track my time please hackatime");
-            Debug.Log("test");
+            stealthParticles.SetActive(false);
+
             ignite = InputSystem.actions.FindAction("Light");
             hasten = InputSystem.actions.FindAction("Speed");
             tp = InputSystem.actions.FindAction("Teleport");
@@ -194,52 +191,53 @@ namespace StarterAssets
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
         }
+        
 
         private void Update()
         {
             RaycastHit hit1;
-        RaycastHit hit2;
-        RaycastHit hit3;
-        RaycastHit hit4;
-        Physics.Raycast(transform.position, Vector3.forward, out hit1, 1);
-        Physics.Raycast(transform.position + Vector3.up, Vector3.back, out hit2, 1);
-        Physics.Raycast(transform.position + Vector3.up, Vector3.left, out hit3, 1);
-        Physics.Raycast(transform.position + Vector3.up, Vector3.right, out hit4, 1);
-        Debug.DrawRay(transform.position + Vector3.up, Vector3.forward, Color.red, 100);
-        //Debug.Log(hit1.collider);
-        if (hit1.collider != null)
-        {
-            //Debug.Log("yes");
-            if (hit1.collider.gameObject.GetComponent<Monster>())
+            RaycastHit hit2;
+            RaycastHit hit3;
+            RaycastHit hit4;
+            Physics.Raycast(transform.position, Vector3.forward, out hit1, 1);
+            Physics.Raycast(transform.position + Vector3.up, Vector3.back, out hit2, 1);
+            Physics.Raycast(transform.position + Vector3.up, Vector3.left, out hit3, 1);
+            Physics.Raycast(transform.position + Vector3.up, Vector3.right, out hit4, 1);
+            Debug.DrawRay(transform.position + Vector3.up, Vector3.forward, Color.red, 100);
+            //Debug.Log(hit1.collider);
+            if (hit1.collider != null)
             {
-                monster.GetComponent<Monster>().Jumpscare();
-            }
+                //Debug.Log("yes");
+                if (hit1.collider.gameObject.GetComponent<Monster>())
+                {
+                    monster.GetComponent<Monster>().Jumpscare();
+                }
 
-        }
-        if (hit2.collider != null)
-        {
-            if (hit2.collider.gameObject.GetComponent<Monster>())
-            {
-                monster.GetComponent<Monster>().Jumpscare();
             }
-            
-        }
-        if (hit3.collider != null)
-        {
-            if (hit3.collider.gameObject.GetComponent<Monster>())
+            if (hit2.collider != null)
             {
-                monster.GetComponent<Monster>().Jumpscare();
+                if (hit2.collider.gameObject.GetComponent<Monster>())
+                {
+                    monster.GetComponent<Monster>().Jumpscare();
+                }
+
             }
-            
-        }
-        if (hit4.collider != null)
-        {
-            if (hit4.collider.gameObject.GetComponent<Monster>())
+            if (hit3.collider != null)
             {
-                monster.GetComponent<Monster>().Jumpscare();
+                if (hit3.collider.gameObject.GetComponent<Monster>())
+                {
+                    monster.GetComponent<Monster>().Jumpscare();
+                }
+
             }
-            
-        }
+            if (hit4.collider != null)
+            {
+                if (hit4.collider.gameObject.GetComponent<Monster>())
+                {
+                    monster.GetComponent<Monster>().Jumpscare();
+                }
+
+            }
             _hasAnimator = TryGetComponent(out _animator);
             ManaUpdate();
             //RaycastHit hit;
@@ -511,9 +509,31 @@ namespace StarterAssets
         }
         private void OnStealth()
         {
-            isStealth = true;
-            
+            if (isStealth)
+            {
+                stealthParticles.SetActive(false);
+                isStealth = false;
+                manaChange += 1;
+            }
+            else
+            {
+                stealthParticles.SetActive(true);
+                isStealth = true;
+                manaChange -= 1;
+            }
+            //Debug.Log(gameObject.GetComponent<Renderer>().material.color.a);
+            //Color b = gameObject.GetComponent<Renderer>().material.color;
+            //Color col = new Color(b.r, b.g, b.b, 0);
+            //gameObject.GetComponent<Renderer>().material.SetColor("_Color", col);
+            //Debug.Log(gameObject.GetComponent<Renderer>().material.color.a);
+
+            //tester.GetComponent<Renderer>().material.ChangeAlpha(0);
         }
+        public bool InStealth()
+        {
+            return isStealth;
+        }
+
         private void OnLight()
         {
             fire.SetActive(!fire.gameObject.activeSelf);
@@ -605,10 +625,24 @@ namespace StarterAssets
 
 
         }
-        
+
 
 
 
     }
+
+
+}
+namespace test {
+    public static class ex
+    {
+        public static void ChangeAlpha(this Material mat, float alphaValue)
+        {
+            Color oldColor = mat.color;
+            Color newColor = new Color(oldColor.r, oldColor.g, oldColor.b, alphaValue);         
+            mat.SetColor("_Color", newColor);               
+        }
+    }
+
 
 }
